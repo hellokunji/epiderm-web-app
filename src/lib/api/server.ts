@@ -52,7 +52,7 @@ export async function backendFetch(
 ): Promise<Response> {
   const { skipAuth = false, headers, ...rest } = init;
   const url = `${serviceBase(service)}${path.startsWith("/") ? path : `/${path}`}`;
-
+  console.log("4", url);
   const buildHeaders = async (token?: string): Promise<Headers> => {
     const next = new Headers(headers);
     if (!next.has("Accept")) next.set("Accept", "application/json");

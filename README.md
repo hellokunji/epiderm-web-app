@@ -34,7 +34,7 @@ When a backend call returns `401`, `apiFetch` / `backendFetch` refresh the sessi
 Required env (see `.env.example`):
 
 - `USER_SERVICE_HOST` — e.g. `http://127.0.0.1:8001/`
-- `CLINIC_SERVICE_HOST` — e.g. `http://127.0.0.1:8001/`
+- `CLINIC_SERVICE_HOST` — e.g. `http://127.0.0.1:8000/`
 
 ## Theme
 

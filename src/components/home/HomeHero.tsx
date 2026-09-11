@@ -27,31 +27,47 @@ export function HomeHero({ isAuthenticated }: { isAuthenticated: boolean }) {
           unlock doctor-reviewed care with medicine kits delivered to your door.
         </p>
 
-        <div className="animate-fade-up mt-10 flex flex-wrap items-center gap-3 [animation-delay:200ms]">
-          {isAuthenticated ? (
-            <a
-              href="#how-it-works"
-              className="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
-            >
-              See how it works
-            </a>
-          ) : (
-            <>
-              <Link
-                href="/signup"
-                className="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
-              >
-                Get started
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] border border-border bg-card/60 px-6 text-base font-medium text-foreground backdrop-blur-sm transition-colors hover:bg-muted"
-              >
-                Log in
-              </Link>
-            </>
-          )}
+        <div className="animate-fade-up mt-10 grid max-w-xl gap-3 sm:grid-cols-2 [animation-delay:200ms]">
+          <Link
+            href="/consult/skin"
+            className="group rounded-[var(--radius-lg)] border border-border bg-card/80 p-5 backdrop-blur-sm transition-colors hover:border-primary"
+          >
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+              Consult
+            </p>
+            <p className="mt-2 font-display text-3xl text-foreground">Skin</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Acne, redness, pigmentation, and barrier concerns.
+            </p>
+            <p className="mt-4 text-sm font-medium text-primary group-hover:underline">
+              Start skin questionnaire
+            </p>
+          </Link>
+          <Link
+            href="/consult/hair"
+            className="group rounded-[var(--radius-lg)] border border-border bg-card/80 p-5 backdrop-blur-sm transition-colors hover:border-primary"
+          >
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+              Consult
+            </p>
+            <p className="mt-2 font-display text-3xl text-foreground">Hair</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Thinning, dandruff, scalp irritation, and breakage.
+            </p>
+            <p className="mt-4 text-sm font-medium text-primary group-hover:underline">
+              Start hair questionnaire
+            </p>
+          </Link>
         </div>
+
+        {!isAuthenticated ? (
+          <p className="animate-fade-up mt-5 text-sm text-muted-foreground [animation-delay:260ms]">
+            You will sign in before the questionnaire.{" "}
+            <Link href="/login" className="text-primary hover:underline">
+              Log in
+            </Link>
+          </p>
+        ) : null}
       </div>
     </section>
   );

@@ -176,6 +176,48 @@
   .animate-underline {
     animation: underline-grow 0.8s ease-out 0.35s both;
   }
+
+  .diagnosis-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+    animation: diagnosis-pulse 2.8s ease-out infinite;
+  }
+
+  .diagnosis-ring-2 {
+    inset: 12px;
+    animation-delay: 0.45s;
+  }
+
+  .diagnosis-ring-3 {
+    inset: 24px;
+    animation-delay: 0.9s;
+  }
+
+  .diagnosis-orb {
+    background: radial-gradient(
+      circle at 30% 25%,
+      var(--brand-gold-300),
+      var(--primary) 55%,
+      var(--brand-gold-700)
+    );
+    box-shadow: 0 0 40px color-mix(in srgb, var(--primary) 35%, transparent);
+  }
+
+  .diagnosis-scan {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    height: 28%;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, white 55%, transparent),
+      transparent
+    );
+    animation: diagnosis-scan 2.2s ease-in-out infinite;
+  }
 }
 
 @keyframes fade-up {
@@ -207,10 +249,32 @@
   }
 }
 
+@keyframes diagnosis-pulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+}
+
+@keyframes diagnosis-scan {
+  0% {
+    transform: translateY(-120%);
+  }
+  100% {
+    transform: translateY(280%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
   .animate-fade-in,
-  .animate-underline {
+  .animate-underline,
+  .diagnosis-ring,
+  .diagnosis-scan {
     animation: none;
   }
 }
