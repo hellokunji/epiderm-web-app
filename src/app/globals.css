@@ -1,26 +1,216 @@
 @import "tailwindcss";
 
+/* ─── Brand: Gold & White (configurable via tokens) ─── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand-gold-50: #fbf7ef;
+  --brand-gold-100: #f5ecd7;
+  --brand-gold-200: #ebd6ae;
+  --brand-gold-300: #e0c085;
+  --brand-gold-400: #d4a85c;
+  --brand-gold-500: #c4923a;
+  --brand-gold-600: #a67830;
+  --brand-gold-700: #845e27;
+  --brand-gold-800: #62461d;
+  --brand-gold-900: #412e14;
+
+  --background: #fafaf8;
+  --foreground: #1c1b17;
+  --muted: #f3f1ec;
+  --muted-foreground: #7a766c;
+  --card: #ffffff;
+  --card-foreground: #1c1b17;
+  --primary: #c4923a;
+  --primary-foreground: #ffffff;
+  --primary-hover: #a67830;
+  --secondary: #f5ecd7;
+  --secondary-foreground: #62461d;
+  --accent: #d4a85c;
+  --accent-foreground: #12110e;
+  --border: #e8e6e1;
+  --ring: #d4a85c;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --success: #067647;
+  --input: #e8e6e1;
+  --input-focus: #d4a85c;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+
+  --hero-overlay: linear-gradient(
+    135deg,
+    rgba(250, 250, 248, 0.92) 0%,
+    rgba(245, 236, 215, 0.78) 45%,
+    rgba(196, 146, 58, 0.22) 100%
+  );
+}
+
+.dark {
+  --background: #12110e;
+  --foreground: #f7f6f4;
+  --muted: #1c1b17;
+  --muted-foreground: #a8a49a;
+  --card: #1c1b17;
+  --card-foreground: #f7f6f4;
+  --primary: #d4a85c;
+  --primary-foreground: #12110e;
+  --primary-hover: #e0c085;
+  --secondary: #2a2822;
+  --secondary-foreground: #ebd6ae;
+  --accent: #c4923a;
+  --accent-foreground: #12110e;
+  --border: #2a2822;
+  --ring: #d4a85c;
+  --destructive: #f97066;
+  --destructive-foreground: #12110e;
+  --success: #47cd89;
+  --input: #2a2822;
+  --input-focus: #d4a85c;
+
+  --hero-overlay: linear-gradient(
+    135deg,
+    rgba(18, 17, 14, 0.94) 0%,
+    rgba(28, 27, 23, 0.88) 50%,
+    rgba(196, 146, 58, 0.28) 100%
+  );
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-input: var(--input);
+  --color-input-focus: var(--input-focus);
+  --color-gold-50: var(--brand-gold-50);
+  --color-gold-100: var(--brand-gold-100);
+  --color-gold-200: var(--brand-gold-200);
+  --color-gold-300: var(--brand-gold-300);
+  --color-gold-400: var(--brand-gold-400);
+  --color-gold-500: var(--brand-gold-500);
+  --color-gold-600: var(--brand-gold-600);
+  --color-gold-700: var(--brand-gold-700);
+  --color-gold-800: var(--brand-gold-800);
+  --color-gold-900: var(--brand-gold-900);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), ui-sans-serif, sans-serif;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 35%, transparent);
+    color: var(--foreground);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), ui-serif, Georgia, serif;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .hero-surface {
+    background-image: var(--hero-overlay),
+      radial-gradient(
+        ellipse 80% 60% at 70% 40%,
+        color-mix(in srgb, var(--primary) 18%, transparent),
+        transparent 70%
+      ),
+      linear-gradient(
+        160deg,
+        var(--background),
+        color-mix(in srgb, var(--secondary) 55%, var(--background))
+      );
+  }
+
+  .animate-fade-up {
+    animation: fade-up var(--motion-slow) ease-out both;
+  }
+
+  .animate-fade-in {
+    animation: fade-in var(--motion-base) ease-out both;
+  }
+
+  .animate-underline {
+    animation: underline-grow 0.8s ease-out 0.35s both;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes underline-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-underline {
+    animation: none;
+  }
 }

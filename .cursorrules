@@ -1,0 +1,38 @@
+# Python FastAPI Best Practices — Web Application [Frontend]
+
+### Project Overview
+Product Context: I am building an AI-powered tele-dermatology and medicine fulfillment frontend.
+
+Workflow:
+**User Submission:** Patient submits a questionnaire with skin/hair photos and videos.
+**AI Diagnosis:** Backend runs inputs asynchronously through a local Vision-LLM (Ollama) to generate a diagnosis.
+**Paywall:** User sees a blurred preview, pays a consultation fee to unlock full findings, and triggers a doctor review.
+**Doctor Review:** Doctor gets notified (Push/SMS/WhatsApp) to Accept (customizes medicine kit), Reject (triggers auto-refund), or Request Info (user resubmits).
+**Fulfillment:** Approved user pays for the kit => triggers third-party logistics API for delivery.
+
+## Overview of the codebase and frontend (web)
+This repository hosts the **Frontend Web Application**, which acts as B2C channel for end users.
+It owns and manages:
+- **Authentication:** Sign UP / Login
+- **Homepage:** Showing about the products (skin, hair) and about the introduction to the product and company
+- **Questionnaire Submissions:** Step by step approach to select and submission of questions to backend
+- **Diagnosis Purchase:** After diagnosis done by AI, user can purchase the full diagnosis by buying the product
+- **Doctor Verification:** Once diagnosis is done by AI and user pays for the full diagnosis, user can see the option of assigned doctors who will write the prescription
+- **Prescriptions & Medicine Kits:** User can see the prescription and after that have option to buy the medicine kit
+
+### Consult Statuses (From starting questionnnaire to kit delivery)
+- `CREATED` — consult created
+- `QUESTIONNAIRE_SUBMITTED` — questionnaire response saved
+- `DRAI_DG_PENDING` — queued for AI diagnosis
+- `DRAI_DG_PROCESSING` — AI diagnosis running
+- `DRAI_DG_DIAGNOSED` — AI diagnosis complete
+- `DRAI_DG_PAYMENT_PENDING` — waiting for diagnosis unlock payment
+- `DRAI_DG_PAYMENT_SUCCESS` — diagnosis payment succeeded
+- `DRAI_DG_PAYMENT_FAILED` — diagnosis payment failed
+- `DR_DG_PENDING` — awaiting doctor diagnosis review
+- `DR_DG_APPROVED` — doctor approved diagnosis
+- `DR_DG_REJECTED` — doctor rejected diagnosis
+- `DRAI_KIT_PROCESSING` — AI kit assembly in progress
+- `DRAI_KIT_PROCESSED` — AI kit ready
+- `DR_KIT_PENDING` — awaiting doctor kit confirmation
+- `DR_KIT_CREATED` — doctor confirmed/created kit

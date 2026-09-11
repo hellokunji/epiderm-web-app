@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Epiderm Web App
 
-## Getting Started
+AI-powered tele-dermatology frontend (Next.js App Router).
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, SSR / SEO)
+- **React 19** + **TypeScript**
+- **Tailwind CSS v4** (design-system tokens — Gold & White)
+- **Auth** — backend-issued opaque tokens (httpOnly cookies + 401 refresh interceptor)
+
+## Getting started
 
 ```bash
+cp .env.example .env.local
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Auth
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Login / signup / refresh proxy to **epiderm-user-service** (`USER_SERVICE_HOST`).
+Tokens are opaque httpOnly cookies — the web app does **not** verify JWTs.
+When a backend call returns `401`, `apiFetch` / `backendFetch` refresh the session and retry.
 
-## Learn More
+| Cookie                   | Purpose                          |
+|--------------------------|----------------------------------|
+| `epiderm_access_token`   | Opaque access token              |
+| `epiderm_refresh_token`  | Opaque refresh token             |
+| `epiderm_user`           | Cached user profile for SSR/UI   |
 
-To learn more about Next.js, take a look at the following resources:
+Required env (see `.env.example`):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `USER_SERVICE_HOST` — e.g. `http://127.0.0.1:8001/`
+- `CLINIC_SERVICE_HOST` — e.g. `http://127.0.0.1:8001/`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Theme
 
-## Deploy on Vercel
+Gold & White semantic tokens live in `src/lib/design/tokens.ts` and `src/app/globals.css`.
+Toggle light/dark from the header; preference is stored in `localStorage`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` — development server (Turbopack)
+- `npm run build` — production build
+- `npm run start` — serve production build
+- `npm run lint` — ESLint
