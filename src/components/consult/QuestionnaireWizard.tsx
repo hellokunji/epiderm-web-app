@@ -4,13 +4,14 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api/client";
 import { buildConsultFormData } from "@/lib/consult/answers";
+import { errorMessageFromPayload, unwrapConsult } from "@/lib/consult/parse";
 import type {
   AnswersMap,
   AnswerValue,
   QuestionnaireSchema,
 } from "@/lib/consult/types";
 import { isRuleVisible } from "@/lib/consult/visibility";
-import { validateStep } from "@/lib/consult/validation";
+import { isQuestionRequired, validateStep } from "@/lib/consult/validation";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { QuestionField } from "@/components/consult/QuestionField";
@@ -79,14 +80,14 @@ export function QuestionnaireWizard({
         method: "POST",
         body: form,
       });
-      const payload = (await res.json().catch(() => null)) as {
-        consult_id?: string;
-        error?: string;
-      } | null;
-      if (!res.ok || !payload?.consult_id) {
-        throw new Error(payload?.error ?? "Could not submit questionnaire");
+      const payload = await res.json().catch(() => null);
+      const consult = unwrapConsult(payload);
+      if (!res.ok || !consult?.consult_id) {
+        throw new Error(
+          errorMessageFromPayload(payload, "Could not submit questionnaire"),
+        );
       }
-      router.push(`/consults/${payload.consult_id}`);
+      router.push(`/consults/${consult.consult_id}`);
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "Could not submit questionnaire",
@@ -146,7 +147,7 @@ export function QuestionnaireWizard({
                 <div key={question.id} className="min-w-0 flex-1">
                   <Label htmlFor={question.id}>
                     {question.title}
-                    {question.required ? (
+                    {isQuestionRequired(question) ? (
                       <span className="text-destructive"> *</span>
                     ) : null}
                   </Label>

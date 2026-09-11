@@ -6,16 +6,17 @@ import {
   fixturesForced,
   getFixtureConsult,
 } from "@/lib/consult/fixture-store";
+import { unwrapConsult } from "@/lib/consult/parse";
 import type {
   ConsultCategory,
   ConsultSummary,
-  ConsultStatus,
   QuestionnaireSchema,
 } from "@/lib/consult/types";
 
 export const CLINIC_PATHS = {
   questionnaire: (category: ConsultCategory) =>
     `/api/v1/questionnaire/?category=${encodeURIComponent(category)}`,
+  submitQuestionnaire: "/api/v1/questionnaire",
   consults: "/api/v1/consults",
   consult: (id: string) => `/api/v1/consults/${encodeURIComponent(id)}`,
 } as const;
@@ -36,44 +37,18 @@ function unwrapQuestionnaire(payload: unknown): QuestionnaireSchema | null {
   return null;
 }
 
-function unwrapConsult(payload: unknown): ConsultSummary | null {
-  if (!payload || typeof payload !== "object") return null;
-  const record = payload as Record<string, unknown>;
-  const candidate = (record.data ?? record.consult ?? payload) as Record<
-    string,
-    unknown
-  >;
-  const consultId =
-    (typeof candidate.consult_id === "string" && candidate.consult_id) ||
-    (typeof candidate.id === "string" && candidate.id) ||
-    null;
-  if (!consultId) return null;
-  return {
-    consult_id: consultId,
-    status: (candidate.status as ConsultStatus) ?? "QUESTIONNAIRE_SUBMITTED",
-    category: candidate.category as ConsultCategory | undefined,
-    questionnaire_id:
-      typeof candidate.questionnaire_id === "string"
-        ? candidate.questionnaire_id
-        : undefined,
-  };
-}
-
 export async function loadQuestionnaire(
   category: ConsultCategory,
 ): Promise<{ questionnaire: QuestionnaireSchema; source: "clinic" | "fixture" }> {
-  console.log("1");
   if (fixturesForced()) {
     return { questionnaire: questionnaireFixture(category), source: "fixture" };
   }
-  console.log("2");
 
   try {
     const res = await backendFetch(
       "clinic",
       CLINIC_PATHS.questionnaire(category),
     );
-    console.log("3", CLINIC_PATHS.questionnaire(category), res);
     if (res.ok) {
       const parsed = unwrapQuestionnaire(await res.json());
       if (parsed) return { questionnaire: parsed, source: "clinic" };
@@ -112,10 +87,12 @@ export async function submitConsult(formData: FormData): Promise<{
   }
 
   try {
-    const res = await backendFetch("clinic", CLINIC_PATHS.consults, {
+    const res = await backendFetch("clinic", CLINIC_PATHS.submitQuestionnaire, {
       method: "POST",
       body: formData,
     });
+
+    console.log("res backendFetch", res);
 
     if (res.status === 202 || res.ok) {
       const parsed = unwrapConsult(await res.json().catch(() => null));

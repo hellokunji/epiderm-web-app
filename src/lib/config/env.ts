@@ -24,8 +24,6 @@ export function getUserServiceHost(): string {
 }
 
 export function getClinicServiceHost(): string {
-  console.log("5", process.env.CLINIC_SERVICE_HOST);
-  console.log("6", process.env.clinic_service_host);
   return trimTrailingSlash(
     required(
       "CLINIC_SERVICE_HOST",

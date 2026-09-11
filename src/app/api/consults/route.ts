@@ -5,6 +5,7 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const { consult, status } = await submitConsult(formData);
+    console.log("consult", consult);
     return NextResponse.json(consult, { status });
   } catch (error) {
     const status =

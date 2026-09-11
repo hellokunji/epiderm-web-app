@@ -35,6 +35,7 @@ Required env (see `.env.example`):
 
 - `USER_SERVICE_HOST` — e.g. `http://127.0.0.1:8001/`
 - `CLINIC_SERVICE_HOST` — e.g. `http://127.0.0.1:8000/`
+- `NEXT_PUBLIC_USER_SERVICE_HOST` — browser login/register
 
 ## Theme
 

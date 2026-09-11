@@ -7,6 +7,15 @@ import type {
 } from "@/lib/consult/types";
 import { isRuleVisible } from "@/lib/consult/visibility";
 
+export function isQuestionRequired(question: QuestionnaireQuestion): boolean {
+  const value = question.required as unknown;
+  if (value === true || value === 1) return true;
+  if (typeof value === "string") {
+    return value.toLowerCase() === "true" || value === "1";
+  }
+  return false;
+}
+
 export function isEmptyAnswer(value: AnswerValue): boolean {
   if (value == null) return true;
   if (typeof value === "string") return value.trim().length === 0;
@@ -52,13 +61,21 @@ export function validateQuestion(
   question: QuestionnaireQuestion,
   value: AnswerValue,
 ): string | null {
-  if (question.required && isEmptyAnswer(value)) {
+  const required = isQuestionRequired(question);
+
+  if (required && isEmptyAnswer(value)) {
     return "This field is required";
   }
 
-  if (question.type === "FILE_UPLOAD") {
+  const isFileQuestion =
+    question.type === "FILE_UPLOAD" ||
+    question.ui_type === "IMAGE_PICKER_GRID";
+
+  if (isFileQuestion) {
     const files = fileList(value);
-    if (question.required && files.length === 0) {
+    // Optional uploads with min_files in constraints must still be skippable.
+    if (files.length === 0 && !required) return null;
+    if (required && files.length === 0) {
       return "Please upload at least one photo";
     }
     return validateFiles(files, question.file_constraints);
