@@ -151,6 +151,21 @@ export type ConsultSummary = {
   questionnaire_id?: string;
 };
 
+export type DiagnosisResult = {
+  primary_concern?: string;
+  observed_symptoms?: string[];
+  severity_level?: string;
+  recommended_kit_type?: string;
+  doctor_notes_summary?: string;
+};
+
+export type ConsultDiagnosis = {
+  consult_id?: string;
+  status?: string;
+  error?: string | null;
+  result?: DiagnosisResult | null;
+};
+
 export function isConsultCategory(value: string): value is ConsultCategory {
   return (CONSULT_CATEGORIES as readonly string[]).includes(value);
 }

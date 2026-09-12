@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { DiagnosisFindings } from "@/components/consult/DiagnosisFindings";
 import { apiFetch } from "@/lib/api/client";
-import { consultRecord } from "@/lib/consult/parse";
+import { consultDiagnosis, consultRecord } from "@/lib/consult/parse";
 import type { ConsultStatus } from "@/lib/consult/types";
 import {
   diagnosisPhaseLabel,
@@ -34,10 +35,13 @@ export function DiagnosisAwaiting({
   const [consult, setConsult] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   const [line, setLine] = useState(0);
+  const [showDiagnosis, setShowDiagnosis] = useState(false);
   const status = consultStatus(consult);
   const ready = isDiagnosisReady(status);
   const failed = isDiagnosisFailed(status);
   const progress = diagnosisProgress(status);
+  const diagnosed = status === "DRAI_DG_DIAGNOSED";
+  const diagnosis = consultDiagnosis(consult);
 
   useEffect(() => {
     if (ready || failed) return;
@@ -76,6 +80,15 @@ export function DiagnosisAwaiting({
       window.clearInterval(timer);
     };
   }, [consultId, failed, ready]);
+
+  if (showDiagnosis && diagnosis) {
+    return (
+      <DiagnosisFindings
+        diagnosis={diagnosis}
+        onBack={() => setShowDiagnosis(false)}
+      />
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col items-center text-center">
@@ -123,16 +136,34 @@ export function DiagnosisAwaiting({
 
       {ready ? (
         <div className="mt-10 space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Unlock the full findings and request a doctor review in the next
-            step.
-          </p>
-          <Link
-            href="/"
-            className="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
-          >
-            Continue
-          </Link>
+          {diagnosed ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Review the AI findings from this consult.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowDiagnosis(true)}
+                disabled={!diagnosis}
+                className="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Show diagnosis
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Unlock the full findings and request a doctor review in the next
+                step.
+              </p>
+              <Link
+                href="/"
+                className="inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-primary px-6 text-base font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
+              >
+                Continue
+              </Link>
+            </>
+          )}
         </div>
       ) : null}
     </div>

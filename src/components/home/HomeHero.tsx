@@ -58,6 +58,23 @@ export function HomeHero({ isAuthenticated }: { isAuthenticated: boolean }) {
               Start hair questionnaire
             </p>
           </Link>
+          <Link
+            href="/consults"
+            className="group rounded-[var(--radius-lg)] border border-border bg-card/80 p-5 backdrop-blur-sm transition-colors hover:border-primary sm:col-span-2"
+          >
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+              Consultations
+            </p>
+            <p className="mt-2 font-display text-3xl text-foreground">
+              Your consults
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Track every skin and hair consult, from questionnaire to diagnosis.
+            </p>
+            <p className="mt-4 text-sm font-medium text-primary group-hover:underline">
+              View all consultations
+            </p>
+          </Link>
         </div>
 
         {!isAuthenticated ? (

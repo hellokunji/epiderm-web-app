@@ -18,6 +18,7 @@ export const CLINIC_PATHS = {
     `/api/v1/questionnaire/?category=${encodeURIComponent(category)}`,
   submitQuestionnaire: "/api/v1/questionnaire",
   consults: "/api/v1/consults",
+  consultAll: "/api/v1/consult/all",
   consult: (id: string) =>
     `/api/v1/consult/?consult_id=${encodeURIComponent(id)}`,
 } as const;
@@ -117,6 +118,23 @@ export async function loadConsult(consultId: string): Promise<unknown> {
   }
   if (!res.ok) {
     throw Object.assign(new Error("Consult not found"), { status: res.status });
+  }
+  return res.json();
+}
+
+export async function loadConsultList(): Promise<unknown> {
+  if (fixturesForced()) {
+    return { items: [] };
+  }
+
+  const res = await backendFetch("clinic", CLINIC_PATHS.consultAll);
+  if (res.status === 401) {
+    throw Object.assign(new Error("UNAUTHORIZED"), { status: 401 });
+  }
+  if (!res.ok) {
+    throw Object.assign(new Error("Could not load consultations"), {
+      status: res.status,
+    });
   }
   return res.json();
 }
