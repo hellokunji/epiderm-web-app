@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { HomeHero } from "@/components/home/HomeHero";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { loadConsultList } from "@/lib/consult/clinic";
+import { latestConsultFromList } from "@/lib/consult/parse";
 import { getSession } from "@/lib/auth/session";
 import { brand } from "@/lib/design/tokens";
+import type { ConsultSummary } from "@/lib/consult/types";
 
 export const metadata: Metadata = {
   title: `${brand.name} — Skin & hair care, doctor-confirmed`,
@@ -11,10 +15,22 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const session = await getSession();
+  let latestConsult: ConsultSummary | null = null;
+
+  if (session) {
+    try {
+      latestConsult = latestConsultFromList(await loadConsultList());
+    } catch {
+      latestConsult = null;
+    }
+  }
 
   return (
     <>
-      <HomeHero isAuthenticated={Boolean(session)} />
+      <HomeHero
+        isAuthenticated={Boolean(session)}
+        latestConsult={latestConsult}
+      />
 
       <section
         id="how-it-works"
@@ -61,6 +77,7 @@ export default async function HomePage() {
           </ol>
         </div>
       </section>
+      <SiteFooter />
     </>
   );
 }

@@ -82,6 +82,19 @@ export function consultListItems(payload: unknown): unknown[] {
   return Array.isArray(items) ? items : [];
 }
 
+export function unwrapConsultList(payload: unknown): ConsultSummary[] {
+  return consultListItems(payload)
+    .map((item) => unwrapConsult(item))
+    .filter((item): item is ConsultSummary => Boolean(item));
+}
+
+export function latestConsultFromList(
+  payload: unknown,
+): ConsultSummary | null {
+  const items = unwrapConsultList(payload);
+  return items.at(-1) ?? null;
+}
+
 export function unwrapConsult(payload: unknown): ConsultSummary | null {
   const candidate = consultRecord(payload);
   if (!candidate) return null;

@@ -7,7 +7,13 @@ import { AUTH_COOKIES } from "@/lib/auth/constants";
  * by the API interceptor when a request returns 401.
  */
 const AUTH_PAGES = new Set(["/login", "/signup"]);
-const PUBLIC_PATHS = new Set(["/", "/login", "/signup"]);
+const PUBLIC_PATHS = new Set([
+  "/",
+  "/login",
+  "/signup",
+  "/terms",
+  "/privacy",
+]);
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
