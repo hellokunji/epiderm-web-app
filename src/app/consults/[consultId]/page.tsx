@@ -31,7 +31,7 @@ export default async function ConsultStatusPage({ params }: PageProps) {
 
   return (
     <div className="hero-surface flex flex-1 items-center px-6 pb-20 pt-28">
-      <DiagnosisAwaiting initial={consult} />
+      <DiagnosisAwaiting consultId={consultId} initial={consult} />
     </div>
   );
 }

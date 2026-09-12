@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api/client";
-import type { ConsultSummary } from "@/lib/consult/types";
+import { consultRecord } from "@/lib/consult/parse";
+import type { ConsultStatus } from "@/lib/consult/types";
 import {
   diagnosisPhaseLabel,
   diagnosisProgress,
@@ -18,17 +19,25 @@ const SCAN_LINES = [
   "Drafting a structured finding",
 ];
 
+function consultStatus(payload: unknown): ConsultStatus {
+  const status = consultRecord(payload)?.status;
+  return typeof status === "string" ? (status as ConsultStatus) : "CREATED";
+}
+
 export function DiagnosisAwaiting({
+  consultId,
   initial,
 }: {
-  initial: ConsultSummary;
+  consultId: string;
+  initial: unknown;
 }) {
   const [consult, setConsult] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   const [line, setLine] = useState(0);
-  const ready = isDiagnosisReady(consult.status);
-  const failed = isDiagnosisFailed(consult.status);
-  const progress = diagnosisProgress(consult.status);
+  const status = consultStatus(consult);
+  const ready = isDiagnosisReady(status);
+  const failed = isDiagnosisFailed(status);
+  const progress = diagnosisProgress(status);
 
   useEffect(() => {
     if (ready || failed) return;
@@ -44,11 +53,11 @@ export function DiagnosisAwaiting({
 
     async function poll() {
       try {
-        const res = await apiFetch(`/api/consults/${consult.consult_id}`);
+        const res = await apiFetch(`/api/consults/${consultId}`);
         if (!res.ok) {
           throw new Error("Could not refresh consult status");
         }
-        const next = (await res.json()) as ConsultSummary;
+        const next: unknown = await res.json();
         if (!cancelled) {
           setConsult(next);
           setError(null);
@@ -66,7 +75,7 @@ export function DiagnosisAwaiting({
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [consult.consult_id, failed, ready]);
+  }, [consultId, failed, ready]);
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col items-center text-center">
@@ -94,7 +103,7 @@ export function DiagnosisAwaiting({
             : "Reading your consult"}
       </h1>
       <p className="mt-3 max-w-md text-muted-foreground">
-        {diagnosisPhaseLabel(consult.status)}
+        {diagnosisPhaseLabel(status)}
         {!ready && !failed ? ` — ${SCAN_LINES[line]}.` : "."}
       </p>
 
@@ -104,7 +113,7 @@ export function DiagnosisAwaiting({
           style={{ width: `${progress}%` }}
         />
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">{consult.status}</p>
+      <p className="mt-2 text-xs text-muted-foreground">{status}</p>
 
       {error ? (
         <p className="mt-4 text-sm text-destructive" role="alert">

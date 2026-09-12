@@ -4,13 +4,35 @@ import type {
   ConsultSummary,
 } from "@/lib/consult/types";
 
+function asConsultRecord(value: unknown): Record<string, unknown> | null {
+  if (Array.isArray(value)) {
+    const first = value[0];
+    return first && typeof first === "object"
+      ? (first as Record<string, unknown>)
+      : null;
+  }
+  if (value && typeof value === "object") {
+    return value as Record<string, unknown>;
+  }
+  return null;
+}
+
+export function consultRecord(
+  payload: unknown,
+): Record<string, unknown> | null {
+  const record = asConsultRecord(payload);
+  if (!record) return null;
+  return (
+    asConsultRecord(record.data) ??
+    asConsultRecord(record.consult) ??
+    asConsultRecord(record.results) ??
+    record
+  );
+}
+
 export function unwrapConsult(payload: unknown): ConsultSummary | null {
-  if (!payload || typeof payload !== "object") return null;
-  const record = payload as Record<string, unknown>;
-  const candidate = (record.data ?? record.consult ?? payload) as Record<
-    string,
-    unknown
-  >;
+  const candidate = consultRecord(payload);
+  if (!candidate) return null;
   const consultId =
     (typeof candidate.consult_id === "string" && candidate.consult_id) ||
     (typeof candidate.id === "string" && candidate.id) ||

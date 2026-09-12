@@ -1,10 +1,13 @@
 import type {
   AnswersMap,
   AnswerValue,
+  ConsultSubmitPayload,
+  QuestionAnswerPayload,
   QuestionnaireQuestion,
+  QuestionnaireSchema,
 } from "@/lib/consult/types";
+import { isFileQuestion, mediaItems } from "@/lib/consult/validation";
 import { isRuleVisible } from "@/lib/consult/visibility";
-import type { QuestionnaireSchema } from "@/lib/consult/types";
 
 export function flattenQuestions(
   schema: QuestionnaireSchema,
@@ -23,71 +26,73 @@ export function flattenVisibleQuestions(
   );
 }
 
-function isFileQuestion(question: QuestionnaireQuestion): boolean {
-  return (
-    question.type === "FILE_UPLOAD" ||
-    question.ui_type === "IMAGE_PICKER_GRID"
+function mediaUrlsFromAnswer(value: AnswerValue): string[] {
+  return mediaItems(value).filter(
+    (item): item is string => typeof item === "string",
   );
 }
 
-function filesFromAnswer(value: AnswerValue): File[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is File => item instanceof File);
+function isVideoQuestion(question: QuestionnaireQuestion): boolean {
+  return (question.file_constraints?.allowed_mime_types ?? []).some((type) =>
+    type.startsWith("video/"),
+  );
 }
 
-function serializeAnswer(
-  question: QuestionnaireQuestion,
+function scalarAnswer(
   value: AnswerValue,
-): unknown {
-  if (isFileQuestion(question)) {
-    return filesFromAnswer(value).map((file) => file.name);
+): string | string[] | number | boolean | null {
+  if (value == null) return null;
+  if (typeof value === "boolean" || typeof value === "number") return value;
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    const strings = value.filter((item): item is string => typeof item === "string");
+    return strings.length > 0 ? strings : null;
   }
-  return value ?? null;
+  return null;
 }
 
-export function answersToJson(
+export function buildConsultPayload(
   schema: QuestionnaireSchema,
   answers: AnswersMap,
-): Record<string, unknown> {
-  const json: Record<string, unknown> = {};
-  for (const question of flattenQuestions(schema)) {
-    json[question.id] = serializeAnswer(question, answers[question.id] ?? null);
-  }
-  return json;
-}
+): ConsultSubmitPayload {
+  const payloadAnswers: QuestionAnswerPayload[] = [];
+  const images: string[] = [];
+  const videos: string[] = [];
 
-export function buildConsultFormData(
-  schema: QuestionnaireSchema,
-  answers: AnswersMap,
-): FormData {
-  const form = new FormData();
-  form.set("questionnaire_id", schema.questionnaire_id);
-  form.set("version", String(schema.version));
-  form.set("category", schema.category);
-  if (schema.locale) form.set("locale", schema.locale);
+  for (const question of flattenVisibleQuestions(schema, answers)) {
+    const value = answers[question.id] ?? null;
 
-  const answerMap = answersToJson(schema, answers);
-  form.set("answers", JSON.stringify(answerMap));
-
-  for (const question of flattenQuestions(schema)) {
-    const serialized = answerMap[question.id];
     if (isFileQuestion(question)) {
-      for (const file of filesFromAnswer(answers[question.id] ?? null)) {
-        form.append(question.id, file);
-      }
+      const urls = mediaUrlsFromAnswer(value);
+      if (urls.length === 0) continue;
+      payloadAnswers.push({
+        question_id: question.id,
+        question: question.title,
+        answer: urls.length === 1 ? urls[0] : urls,
+      });
+      if (isVideoQuestion(question)) videos.push(...urls);
+      else images.push(...urls);
       continue;
     }
-    if (serialized == null) {
-      form.set(question.id, "");
-      continue;
-    }
-    form.set(
-      question.id,
-      typeof serialized === "string" ? serialized : JSON.stringify(serialized),
-    );
+
+    const answer = scalarAnswer(value);
+    if (answer == null || answer === "") continue;
+    payloadAnswers.push({
+      question_id: question.id,
+      question: question.title,
+      answer,
+    });
   }
 
-  return form;
+  return {
+    category: schema.category,
+    questionnaire: {
+      questionnaire_id: schema.questionnaire_id,
+      answers: payloadAnswers,
+    },
+    ...(images.length > 0 ? { images } : {}),
+    ...(videos.length > 0 ? { videos } : {}),
+  };
 }
 
 export function defaultAnswer(question: QuestionnaireQuestion): AnswerValue {

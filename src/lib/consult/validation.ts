@@ -25,33 +25,48 @@ export function isEmptyAnswer(value: AnswerValue): boolean {
   return true;
 }
 
-function fileList(value: AnswerValue): File[] {
+export function isFileQuestion(question: QuestionnaireQuestion): boolean {
+  return (
+    question.type === "FILE_UPLOAD" ||
+    question.ui_type === "IMAGE_PICKER_GRID"
+  );
+}
+
+export function mediaItems(value: AnswerValue): Array<File | string> {
+  if (typeof value === "string") {
+    return value.trim() ? [value.trim()] : [];
+  }
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is File => item instanceof File);
+  return value.filter(
+    (item): item is File | string =>
+      item instanceof File ||
+      (typeof item === "string" && item.trim().length > 0),
+  );
 }
 
 function validateFiles(
-  files: File[],
+  items: Array<File | string>,
   constraints: FileConstraints | undefined,
 ): string | null {
   if (!constraints) return null;
   const min = constraints.min_files ?? 0;
-  if (files.length < min) {
+  if (items.length < min) {
     return `Please add at least ${min} file${min === 1 ? "" : "s"}`;
   }
-  if (files.length > constraints.max_files) {
+  if (items.length > constraints.max_files) {
     return `You can upload up to ${constraints.max_files} files`;
   }
   const maxBytes = constraints.max_size_mb * 1024 * 1024;
-  for (const file of files) {
-    if (file.size > maxBytes) {
-      return `${file.name} exceeds ${constraints.max_size_mb} MB`;
+  for (const item of items) {
+    if (typeof item === "string") continue;
+    if (item.size > maxBytes) {
+      return `${item.name} exceeds ${constraints.max_size_mb} MB`;
     }
     if (
       constraints.allowed_mime_types.length > 0 &&
-      !constraints.allowed_mime_types.includes(file.type)
+      !constraints.allowed_mime_types.includes(item.type)
     ) {
-      return `${file.name} is not an allowed file type`;
+      return `${item.name} is not an allowed file type`;
     }
   }
   return null;
@@ -67,18 +82,14 @@ export function validateQuestion(
     return "This field is required";
   }
 
-  const isFileQuestion =
-    question.type === "FILE_UPLOAD" ||
-    question.ui_type === "IMAGE_PICKER_GRID";
-
-  if (isFileQuestion) {
-    const files = fileList(value);
+  if (isFileQuestion(question)) {
+    const items = mediaItems(value);
     // Optional uploads with min_files in constraints must still be skippable.
-    if (files.length === 0 && !required) return null;
-    if (required && files.length === 0) {
+    if (items.length === 0 && !required) return null;
+    if (required && items.length === 0) {
       return "Please upload at least one photo";
     }
-    return validateFiles(files, question.file_constraints);
+    return validateFiles(items, question.file_constraints);
   }
 
   if (isEmptyAnswer(value) || !question.validation) return null;

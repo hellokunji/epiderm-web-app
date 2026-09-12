@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api/client";
-import { buildConsultFormData } from "@/lib/consult/answers";
+import { buildConsultPayload } from "@/lib/consult/answers";
 import { errorMessageFromPayload, unwrapConsult } from "@/lib/consult/parse";
 import type {
   AnswersMap,
@@ -75,10 +75,10 @@ export function QuestionnaireWizard({
     setPending(true);
     setSubmitError(null);
     try {
-      const form = buildConsultFormData(schema, answers);
       const res = await apiFetch("/api/consults", {
         method: "POST",
-        body: form,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildConsultPayload(schema, answers)),
       });
       const payload = await res.json().catch(() => null);
       const consult = unwrapConsult(payload);

@@ -128,6 +128,22 @@ export type AnswerValue = string | number | boolean | string[] | File[] | null;
 
 export type AnswersMap = Record<string, AnswerValue>;
 
+export type QuestionAnswerPayload = {
+  question_id: string;
+  question: string;
+  answer: string | string[] | number | boolean;
+};
+
+export type ConsultSubmitPayload = {
+  category: ConsultCategory;
+  questionnaire: {
+    questionnaire_id: string;
+    answers: QuestionAnswerPayload[];
+  };
+  images?: string[];
+  videos?: string[];
+};
+
 export type ConsultSummary = {
   consult_id: string;
   status: ConsultStatus;
