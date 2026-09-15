@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { ConsultList } from "@/components/consult/ConsultList";
 import { loadConsultList } from "@/lib/consult/clinic";
 import type { Metadata } from "next";
@@ -9,7 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default async function ConsultsPage() {
-  let payload;
+  let payload: unknown = { items: [] };
+  let loadError: string | null = null;
+
   try {
     payload = await loadConsultList();
   } catch (error) {
@@ -20,7 +22,7 @@ export default async function ConsultsPage() {
     if (status === 401) {
       redirect("/login?next=/consults");
     }
-    notFound();
+    loadError = "Could not load consultations. Please try again.";
   }
 
   return (
@@ -35,6 +37,11 @@ export default async function ConsultsPage() {
         <p className="mt-3 text-muted-foreground">
           Open a consult to check its status or view an available diagnosis.
         </p>
+        {loadError ? (
+          <p className="mt-6 text-sm text-destructive" role="alert">
+            {loadError}
+          </p>
+        ) : null}
         <div className="mt-10">
           <ConsultList payload={payload} />
         </div>
@@ -42,3 +49,4 @@ export default async function ConsultsPage() {
     </div>
   );
 }
+
