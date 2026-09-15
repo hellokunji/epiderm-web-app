@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api/client";
 import { buildConsultPayload } from "@/lib/consult/answers";
 import { errorMessageFromPayload, unwrapConsult } from "@/lib/consult/parse";
+import { withUploadedMedia } from "@/lib/consult/uploads";
 import type {
   AnswersMap,
   AnswerValue,
@@ -75,10 +76,11 @@ export function QuestionnaireWizard({
     setPending(true);
     setSubmitError(null);
     try {
+      const answersWithUrls = await withUploadedMedia(schema, answers);
       const res = await apiFetch("/api/consults", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildConsultPayload(schema, answers)),
+        body: JSON.stringify(buildConsultPayload(schema, answersWithUrls)),
       });
       const payload = await res.json().catch(() => null);
       const consult = unwrapConsult(payload);
@@ -193,7 +195,7 @@ export function QuestionnaireWizard({
             Back
           </Button>
           <Button type="submit" disabled={pending}>
-            {pending ? "Submitting…" : isLast ? "Submit for diagnosis" : "Continue"}
+            {pending ? "Uploading…" : isLast ? "Submit for diagnosis" : "Continue"}
           </Button>
         </div>
       </form>

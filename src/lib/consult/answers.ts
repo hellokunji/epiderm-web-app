@@ -32,7 +32,7 @@ function mediaUrlsFromAnswer(value: AnswerValue): string[] {
   );
 }
 
-function isVideoQuestion(question: QuestionnaireQuestion): boolean {
+export function isVideoQuestion(question: QuestionnaireQuestion): boolean {
   return (question.file_constraints?.allowed_mime_types ?? []).some((type) =>
     type.startsWith("video/"),
   );
